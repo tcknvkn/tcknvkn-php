@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - release
+      - development
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - release
+      - development
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer:v2
+          coverage: none
+
+      - run: composer validate --strict
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: vendor/bin/phpunit --configuration phpunit.xml.dist --colors=never
+      - run: composer dump-autoload -o
+
+  verify-tag-on-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: test-and-build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag commit is on release branch
+        run: |
+          git fetch origin release --depth=1
+          git merge-base --is-ancestor "$GITHUB_SHA" "origin/release"
+
+  deploy-beta:
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref_name, '-beta')
+    needs: verify-tag-on-release
+    runs-on: ubuntu-latest
+    environment:
+      name: php-beta
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer:v2
+          coverage: none
+
+      - run: composer install --no-interaction --prefer-dist --no-progress --no-dev
+      - run: composer archive --format=zip --file tcknvkn-php-${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tcknvkn-php-${{ github.ref_name }}
+          path: tcknvkn-php-${{ github.ref_name }}.zip
+
+      - name: Create beta release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          prerelease: true
+          generate_release_notes: false
+          body: |
+            PHP için TCKN (TC Kimlik No) ve VKN (Vergi Kimlik No) doğrulama kütüphanesi beta sürümü.
+
+            İlgili bağlantılar:
+            - https://www.tcknvkn.com/kutuphaneler
+            - https://www.tcknvkn.com/kutuphaneler/php
+            - https://www.tcknvkn.com/tc-uret
+            - https://www.tcknvkn.com/tc-no-uret
+            - https://www.tcknvkn.com/tc-uretici
+            - https://tcknvkn.com/tckn-uret
+            - https://www.tcknvkn.com/vergi-no-uret
+            - https://www.tcknvkn.com/vergi-no-uretici
+            - https://tcknvkn.com/vkn-uret
+
+            #tckn #vkn #php #tcknvkn #tcuret #vknuret
+
+  deploy-production:
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-beta')
+    needs: verify-tag-on-release
+    runs-on: ubuntu-latest
+    environment:
+      name: php-production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer:v2
+          coverage: none
+
+      - run: composer install --no-interaction --prefer-dist --no-progress --no-dev
+      - run: composer archive --format=zip --file tcknvkn-php-${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tcknvkn-php-${{ github.ref_name }}
+          path: tcknvkn-php-${{ github.ref_name }}.zip
+
+      - name: Create production release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          prerelease: false
+          generate_release_notes: false
+          body: |
+            PHP için TCKN (TC Kimlik No) ve VKN (Vergi Kimlik No) doğrulama kütüphanesi kararlı sürümü.
+
+            İlgili bağlantılar:
+            - https://www.tcknvkn.com/kutuphaneler
+            - https://www.tcknvkn.com/kutuphaneler/php
+            - https://www.tcknvkn.com/tc-uret
+            - https://www.tcknvkn.com/tc-no-uret
+            - https://www.tcknvkn.com/tc-uretici
+            - https://tcknvkn.com/tckn-uret
+            - https://www.tcknvkn.com/vergi-no-uret
+            - https://www.tcknvkn.com/vergi-no-uretici
+            - https://tcknvkn.com/vkn-uret
+
+            #tckn #vkn #php #tcknvkn #tcuret #vknuret

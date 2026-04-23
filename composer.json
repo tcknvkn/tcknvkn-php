@@ -1,0 +1,48 @@
+{
+  "name": "tcknvkn/tcknvkn",
+  "description": "PHP library for TCKN (TC Kimlik No) and VKN (Vergi Kimlik No) validation algorithms.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "tcknvkn.com",
+      "email": "info@tcknvkn.com"
+    }
+  ],
+  "keywords": [
+    "tckn",
+    "vkn",
+    "tc no",
+    "vergi no",
+    "validation",
+    "php"
+  ],
+  "autoload-dev": {
+    "psr-4": {
+      "TcknVkn\\Tests\\": "tests/"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "TcknVkn\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit --configuration phpunit.xml.dist",
+    "test:ci": "vendor/bin/phpunit --configuration phpunit.xml.dist --colors=never"
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "support": {
+    "issues": "https://github.com/tcknvkn/tcknvkn-php/issues",
+    "source": "https://github.com/tcknvkn/tcknvkn-php",
+    "docs": "https://www.tcknvkn.com/kutuphaneler/php"
+  }
+}
