@@ -1,0 +1,11 @@
+# GitHub repo ayarlarının kaynağı (FAZ4-4c.4).
+# gh repo edit çağrıları bu dosyadan beslenir; elle GitHub üzerinden değiştirme.
+
+repo=tcknvkn-php
+local_dir=php
+default_branch=release
+package_id=tcknvkn/tcknvkn
+registry=Packagist
+homepage=https://www.tcknvkn.com/kutuphaneler/php
+topics=tckn,vkn,tc-kimlik-no,vergi-kimlik-no,validation,turkish,php
+# description: GitHub üzerindeki mevcut açıklama korunur
